@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.practicum.collector.mapper.SensorEventMappable;
 
 import java.time.Instant;
 
@@ -26,7 +27,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-public abstract class SensorEvent {
+public abstract class SensorEvent implements SensorEventMappable {
     @NotBlank
     private String id;
 
@@ -37,4 +38,5 @@ public abstract class SensorEvent {
 
     @NotNull
     public abstract SensorEventType getType();
+
 }

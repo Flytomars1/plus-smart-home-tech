@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.practicum.collector.mapper.HubEventMappable;
 
 import java.time.Instant;
 
@@ -25,7 +26,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-public abstract class HubEvent {
+public abstract class HubEvent implements HubEventMappable {
     @NotBlank
     private String hubId;
 
