@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: aggregator
+
+logging:
+  level:
+    ru.yandex.practicum.aggregator: DEBUG
+    org.apache.kafka: INFO
+
+kafka:
+  bootstrap-servers: localhost:9092
+  consumer:
+    group-id: aggregator
+    auto-offset-reset: earliest
+  producer:
+    value-serializer: ru.yandex.practicum.aggregator.service.serializer.SnapshotSerializer
+    acks: all
+    retries: 3
+  topics:
+    sensors: telemetry.sensors.v1
+    snapshots: telemetry.snapshots.v1
