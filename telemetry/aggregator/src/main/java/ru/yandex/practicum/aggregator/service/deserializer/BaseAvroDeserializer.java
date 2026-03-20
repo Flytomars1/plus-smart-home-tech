@@ -30,7 +30,6 @@ public abstract class BaseAvroDeserializer<T extends SpecificRecordBase> impleme
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
-        // nothing to configure
     }
 
     @Override
@@ -50,6 +49,5 @@ public abstract class BaseAvroDeserializer<T extends SpecificRecordBase> impleme
 
     @Override
     public void close() {
-        // nothing to close
     }
 }
