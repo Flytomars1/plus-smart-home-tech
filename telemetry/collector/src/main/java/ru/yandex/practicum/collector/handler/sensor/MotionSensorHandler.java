@@ -36,7 +36,10 @@ public class MotionSensorHandler implements SensorEventHandler {
 
     private MotionSensorEvent mapToInternal(SensorEventProto event) {
         var motionData = event.getMotionSensor();
-        Instant timestamp = Instant.ofEpochMilli(event.getTimestamp());
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
 
         MotionSensorEvent motionEvent = new MotionSensorEvent();
         motionEvent.setId(event.getId());

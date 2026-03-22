@@ -35,7 +35,10 @@ public class ClimateSensorHandler implements SensorEventHandler {
 
     private ClimateSensorEvent mapToInternal(SensorEventProto event) {
         var climateData = event.getClimateSensor();
-        Instant timestamp = Instant.ofEpochMilli(event.getTimestamp());
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
 
         ClimateSensorEvent climateEvent = new ClimateSensorEvent();
         climateEvent.setId(event.getId());
