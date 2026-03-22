@@ -35,7 +35,11 @@ public class SwitchSensorHandler implements SensorEventHandler {
 
     private SwitchSensorEvent mapToInternal(SensorEventProto event) {
         var switchData = event.getSwitchSensor();
-        Instant timestamp = Instant.ofEpochMilli(event.getTimestamp());
+
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
 
         SwitchSensorEvent switchEvent = new SwitchSensorEvent();
         switchEvent.setId(event.getId());

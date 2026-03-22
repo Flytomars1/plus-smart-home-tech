@@ -25,12 +25,18 @@ public class ScenarioRemovedHandler implements HubEventHandler {
     @Override
     public void handle(HubEventProto event) {
         var payload = event.getScenarioRemoved();
+
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
+
         log.info("Обработка удаления сценария: hubId={}, name={}",
                 event.getHubId(), payload.getName());
 
         ScenarioRemovedEvent scenarioEvent = new ScenarioRemovedEvent();
         scenarioEvent.setHubId(event.getHubId());
-        scenarioEvent.setTimestamp(Instant.ofEpochMilli(event.getTimestamp()));
+        scenarioEvent.setTimestamp(timestamp);
         scenarioEvent.setName(payload.getName());
 
         kafkaEventProducer.sendHubEvent(scenarioEvent);

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.collector.grpc;
 
+import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -9,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.collector.handler.HubEventHandler;
 import ru.yandex.practicum.collector.handler.SensorEventHandler;
 import ru.yandex.practicum.grpc.telemetry.collector.CollectorControllerGrpc;
-import ru.yandex.practicum.grpc.telemetry.collector.CollectorResponseProto;
-import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
-import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.*;
 
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class CollectorGrpcController extends CollectorControllerGrpc.CollectorCo
     @Override
     public void collectSensorEvent(
             SensorEventProto request,
-            StreamObserver<CollectorResponseProto> responseObserver) {
+            StreamObserver<Empty> responseObserver) {
 
         log.info("Получено gRPC событие от датчика: type={}, id={}, hubId={}",
                 request.getPayloadCase(), request.getId(), request.getHubId());
@@ -64,12 +63,7 @@ public class CollectorGrpcController extends CollectorControllerGrpc.CollectorCo
 
             handler.handle(request);
 
-            CollectorResponseProto response = CollectorResponseProto.newBuilder()
-                    .setSuccess(true)
-                    .setMessage("Событие датчика успешно обработано")
-                    .build();
-
-            responseObserver.onNext(response);
+            responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
 
         } catch (Exception e) {
@@ -85,7 +79,7 @@ public class CollectorGrpcController extends CollectorControllerGrpc.CollectorCo
     @Override
     public void collectHubEvent(
             HubEventProto request,
-            StreamObserver<CollectorResponseProto> responseObserver) {
+            StreamObserver<Empty> responseObserver) {
 
         log.info("Получено gRPC событие от хаба: type={}, hubId={}",
                 request.getPayloadCase(), request.getHubId());
@@ -100,12 +94,7 @@ public class CollectorGrpcController extends CollectorControllerGrpc.CollectorCo
 
             handler.handle(request);
 
-            CollectorResponseProto response = CollectorResponseProto.newBuilder()
-                    .setSuccess(true)
-                    .setMessage("Событие хаба успешно обработано")
-                    .build();
-
-            responseObserver.onNext(response);
+            responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
 
         } catch (Exception e) {

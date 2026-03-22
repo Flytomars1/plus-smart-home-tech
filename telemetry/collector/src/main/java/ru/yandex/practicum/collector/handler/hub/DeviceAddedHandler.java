@@ -26,12 +26,18 @@ public class DeviceAddedHandler implements HubEventHandler {
     @Override
     public void handle(HubEventProto event) {
         var payload = event.getDeviceAdded();
+
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
+
         log.info("Обработка добавления устройства: hubId={}, deviceId={}, type={}",
                 event.getHubId(), payload.getId(), payload.getType());
 
         DeviceAddedEvent deviceEvent = new DeviceAddedEvent();
         deviceEvent.setHubId(event.getHubId());
-        deviceEvent.setTimestamp(Instant.ofEpochMilli(event.getTimestamp()));
+        deviceEvent.setTimestamp(timestamp);
         deviceEvent.setId(payload.getId());
         deviceEvent.setDeviceType(mapDeviceType(payload.getType()));
 

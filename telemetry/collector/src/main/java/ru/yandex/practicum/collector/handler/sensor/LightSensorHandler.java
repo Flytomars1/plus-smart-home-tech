@@ -35,7 +35,10 @@ public class LightSensorHandler implements SensorEventHandler {
 
     private LightSensorEvent mapToInternal(SensorEventProto event) {
         var lightData = event.getLightSensor();
-        Instant timestamp = Instant.ofEpochMilli(event.getTimestamp());
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
 
         LightSensorEvent lightEvent = new LightSensorEvent();
         lightEvent.setId(event.getId());

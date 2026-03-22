@@ -35,7 +35,10 @@ public class TemperatureSensorHandler implements SensorEventHandler {
 
     private TemperatureSensorEvent mapToInternal(SensorEventProto event) {
         var tempData = event.getTemperatureSensor();
-        Instant timestamp = Instant.ofEpochMilli(event.getTimestamp());
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
 
         TemperatureSensorEvent tempEvent = new TemperatureSensorEvent();
         tempEvent.setId(event.getId());

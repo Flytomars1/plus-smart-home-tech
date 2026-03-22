@@ -25,12 +25,18 @@ public class DeviceRemovedHandler implements HubEventHandler {
     @Override
     public void handle(HubEventProto event) {
         var payload = event.getDeviceRemoved();
+
+        Instant timestamp = Instant.ofEpochSecond(
+                event.getTimestamp().getSeconds(),
+                event.getTimestamp().getNanos()
+        );
+
         log.info("Обработка удаления устройства: hubId={}, deviceId={}",
                 event.getHubId(), payload.getId());
 
         DeviceRemovedEvent deviceEvent = new DeviceRemovedEvent();
         deviceEvent.setHubId(event.getHubId());
-        deviceEvent.setTimestamp(Instant.ofEpochMilli(event.getTimestamp()));
+        deviceEvent.setTimestamp(timestamp);
         deviceEvent.setId(payload.getId());
 
         kafkaEventProducer.sendHubEvent(deviceEvent);

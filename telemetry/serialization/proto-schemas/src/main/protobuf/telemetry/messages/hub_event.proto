@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package telemetry.message.event;
 
+import "google/protobuf/timestamp.proto";
+
 option java_multiple_files = true;
 option java_package = "ru.yandex.practicum.grpc.telemetry.event";
 
@@ -42,7 +44,7 @@ enum ActionTypeProto {
 // Основное событие хаба
 message HubEventProto {
   string hub_id = 1;
-  int64 timestamp = 2;
+  google.protobuf.Timestamp timestamp = 2;
 
   oneof payload {
     DeviceAddedEventProto device_added = 3;
