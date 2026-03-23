@@ -38,13 +38,13 @@ public class SnapshotManager {
         if (oldState != null) {
             Instant oldTimestamp = oldState.getTimestamp();
 
-            if (!oldTimestamp.isBefore(eventTimestamp)) {
+            if (eventTimestamp.isBefore(oldTimestamp)) {
                 log.debug("Игнорируем устаревшее событие для датчика {}: old={}, new={}",
                         sensorId, oldTimestamp, eventTimestamp);
                 return Optional.empty();
             }
 
-            if (oldState.getData().equals(event.getPayload())) {
+            if (eventTimestamp.equals(oldTimestamp) && oldState.getData().equals(event.getPayload())) {
                 log.debug("Игнорируем дубликат события для датчика {}", sensorId);
                 return Optional.empty();
             }

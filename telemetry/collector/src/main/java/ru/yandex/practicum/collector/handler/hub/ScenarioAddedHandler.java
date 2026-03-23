@@ -46,51 +46,25 @@ public class ScenarioAddedHandler implements HubEventHandler {
         kafkaEventProducer.sendHubEvent(scenarioEvent);
     }
 
-    //я не понимаю, почему в тестовом скрипте оно приходит как булево, если тест блин ожидает 500 и 15. Сорри, я так сделал
     private List<ScenarioCondition> mapConditions(List<ru.yandex.practicum.grpc.telemetry.event.ScenarioConditionProto> conditions) {
         List<ScenarioCondition> result = new ArrayList<>();
         for (var c : conditions) {
             ScenarioCondition condition = new ScenarioCondition();
             condition.setSensorId(c.getSensorId());
-            ConditionType type = mapConditionType(c.getType());
-            condition.setType(type);
+            condition.setType(mapConditionType(c.getType()));
             condition.setOperation(mapConditionOperation(c.getOperation()));
 
-            Object value = null;
             switch (c.getValueCase()) {
                 case INT_VALUE:
-                    value = c.getIntValue();
+                    condition.setValue(c.getIntValue());
                     break;
                 case BOOL_VALUE:
-                    value = c.getBoolValue();
+                    condition.setValue(c.getBoolValue());
                     break;
-                case VALUE_NOT_SET:
                 default:
-                    value = null;
-                    break;
+                    condition.setValue(null);
             }
 
-            if (value instanceof Boolean) {
-                boolean boolValue = (Boolean) value;
-                switch (type) {
-                    case LUMINOSITY:
-                        value = boolValue ? 500 : 0;
-                        break;
-                    case TEMPERATURE:
-                        value = boolValue ? 15 : 0;
-                        break;
-                    case CO2LEVEL:
-                        value = boolValue ? 1000 : 0;
-                        break;
-                    case HUMIDITY:
-                        value = boolValue ? 50 : 0;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            condition.setValue(value);
             result.add(condition);
         }
         return result;

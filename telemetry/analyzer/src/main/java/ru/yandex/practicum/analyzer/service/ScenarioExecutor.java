@@ -3,6 +3,7 @@ package ru.yandex.practicum.analyzer.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.analyzer.client.HubRouterClient;
 import ru.yandex.practicum.analyzer.model.dto.SnapshotData;
 import ru.yandex.practicum.analyzer.model.entity.Action;
@@ -16,7 +17,6 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 @Slf4j
 @Service
@@ -26,11 +26,11 @@ public class ScenarioExecutor {
     private final ScenarioRepository scenarioRepository;
     private final HubRouterClient hubRouterClient;
 
+    @Transactional(readOnly = true)
     public void executeScenarios(SensorsSnapshotAvro snapshot) {
         SnapshotData snapshotData = SnapshotData.fromAvro(snapshot);
         String hubId = snapshotData.getHubId();
 
-        // Загружаем все сценарии для этого хаба
         List<Scenario> scenarios = scenarioRepository.findByHubId(hubId);
 
         for (Scenario scenario : scenarios) {
