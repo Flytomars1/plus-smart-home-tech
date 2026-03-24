@@ -26,10 +26,13 @@ kafka:
     group-id: analyzer-snapshot-group
     auto-offset-reset: earliest
     enable-auto-commit: false
+    poll-timeout-ms: 1000
+    commit-batch-size: 100
   hub-event-consumer:
     group-id: analyzer-hub-group
     auto-offset-reset: earliest
     enable-auto-commit: false
+    poll-timeout-ms: 1000
   topics:
     snapshots: telemetry.snapshots.v1
     hub-events: telemetry.hubs.v1

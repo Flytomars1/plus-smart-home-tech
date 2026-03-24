@@ -21,6 +21,8 @@ public class KafkaProperties {
         private String groupId;
         private String autoOffsetReset = "earliest";
         private boolean enableAutoCommit = false;
+        private int pollTimeoutMs = 1000;
+        private int commitBatchSize = 100;
     }
 
     @Getter

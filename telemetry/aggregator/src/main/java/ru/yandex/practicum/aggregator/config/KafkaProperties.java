@@ -4,12 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaProperties {
 
     private String bootstrapServers = "localhost:9092";
+
+    // Общие настройки для consumer и producer
+    private Map<String, String> commonProperties = new HashMap<>();
 
     private final Consumer consumer = new Consumer();
     private final Producer producer = new Producer();
@@ -20,6 +26,7 @@ public class KafkaProperties {
     public static class Consumer {
         private String groupId = "aggregator";
         private String autoOffsetReset = "earliest";
+        private boolean enableAutoCommit = false;
     }
 
     @Getter

@@ -6,8 +6,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.yandex.practicum.analyzer.service.deserializer.HubEventDeserializer;
-import ru.yandex.practicum.analyzer.service.deserializer.SnapshotDeserializer;
+import ru.yandex.practicum.kafka.telemetry.deserializer.HubEventDeserializer;
+import ru.yandex.practicum.kafka.telemetry.deserializer.SnapshotDeserializer;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 

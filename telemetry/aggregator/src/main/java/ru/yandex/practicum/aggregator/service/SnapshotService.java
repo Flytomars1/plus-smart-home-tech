@@ -28,6 +28,8 @@ public class SnapshotService {
         try {
             ProducerRecord<String, SensorsSnapshotAvro> record = new ProducerRecord<>(
                     properties.getTopics().getSnapshots(),
+                    null,
+                    snapshot.getTimestamp().toEpochMilli(),
                     snapshot.getHubId(),
                     snapshot
             );
@@ -36,8 +38,8 @@ public class SnapshotService {
                 if (exception != null) {
                     log.error("Ошибка отправки снапшота в Kafka", exception);
                 } else {
-                    log.debug("Снапшот отправлен: hubId={}, partition={}, offset={}",
-                            snapshot.getHubId(), metadata.partition(), metadata.offset());
+                    log.debug("Снапшот отправлен: hubId={}, partition={}, offset={}, timestamp={}",
+                            snapshot.getHubId(), metadata.partition(), metadata.offset(), snapshot.getTimestamp());
                 }
             });
         } catch (Exception e) {

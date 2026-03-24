@@ -23,7 +23,6 @@ public class SnapshotManager {
         Instant eventTimestamp = event.getTimestamp();
 
         SensorsSnapshotAvro snapshot = snapshots.get(hubId);
-
         if (snapshot == null) {
             snapshot = SensorsSnapshotAvro.newBuilder()
                     .setHubId(hubId)
@@ -36,15 +35,13 @@ public class SnapshotManager {
         SensorStateAvro oldState = snapshot.getSensorsState().get(sensorId);
 
         if (oldState != null) {
-            Instant oldTimestamp = oldState.getTimestamp();
-
-            if (eventTimestamp.isBefore(oldTimestamp)) {
+            if (eventTimestamp.isBefore(oldState.getTimestamp())) {
                 log.debug("Игнорируем устаревшее событие для датчика {}: old={}, new={}",
-                        sensorId, oldTimestamp, eventTimestamp);
+                        sensorId, oldState.getTimestamp(), eventTimestamp);
                 return Optional.empty();
             }
 
-            if (eventTimestamp.equals(oldTimestamp) && oldState.getData().equals(event.getPayload())) {
+            if (oldState.getData().equals(event.getPayload())) {
                 log.debug("Игнорируем дубликат события для датчика {}", sensorId);
                 return Optional.empty();
             }
