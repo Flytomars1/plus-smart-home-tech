@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: analyzer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/analyzer
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    ru.yandex.practicum.analyzer: DEBUG
+    org.apache.kafka: INFO
+    org.hibernate.SQL: WARN
+
+kafka:
+  bootstrap-servers: localhost:9092
+  snapshot-consumer:
+    group-id: analyzer-snapshot-group
+    auto-offset-reset: earliest
+    enable-auto-commit: false
+    poll-timeout-ms: 1000
+    commit-batch-size: 100
+  hub-event-consumer:
+    group-id: analyzer-hub-group
+    auto-offset-reset: earliest
+    enable-auto-commit: false
+    poll-timeout-ms: 1000
+  topics:
+    snapshots: telemetry.snapshots.v1
+    hub-events: telemetry.hubs.v1
+
+grpc:
+  client:
+    hub-router:
+      address: 'static://localhost:59090'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
