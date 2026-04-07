@@ -1,0 +1,17 @@
+collector:
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.collector.service.AvroSerializer
+      acks: all
+      retries: 3
+      enable-idempotence: true
+      batch-size: 16384
+      linger-ms: 10
+      buffer-memory: 33554432
+      request-timeout-ms: 30000
+      delivery-timeout-ms: 120000
+    topics:
+      sensors: telemetry.sensors.v1
+      hubs: telemetry.hubs.v1

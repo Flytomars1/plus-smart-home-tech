@@ -1,32 +1,16 @@
 spring:
   application:
     name: aggregator
+  config:
+    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
 
 logging:
   level:
     ru.yandex.practicum.aggregator: DEBUG
     org.apache.kafka: INFO
-
-kafka:
-  bootstrap-servers: localhost:9092
-  common-properties:
-    "security.protocol": "PLAINTEXT"
-    "client.dns.lookup": "use_all_dns_ips"
-    "connections.max.idle.ms": "540000"
-    "request.timeout.ms": "30000"
-    "retry.backoff.ms": "100"
-    "reconnect.backoff.ms": "50"
-    "reconnect.backoff.max.ms": "1000"
-    "send.buffer.bytes": "131072"
-    "receive.buffer.bytes": "65536"
-
-  consumer:
-    group-id: aggregator
-    auto-offset-reset: earliest
-  producer:
-    value-serializer: ru.yandex.practicum.aggregator.service.serializer.SnapshotSerializer
-    acks: all
-    retries: 3
-  topics:
-    sensors: telemetry.sensors.v1
-    snapshots: telemetry.snapshots.v1

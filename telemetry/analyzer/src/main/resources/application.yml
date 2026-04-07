@@ -1,6 +1,14 @@
 spring:
   application:
     name: analyzer
+  config:
+    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
   datasource:
     url: jdbc:postgresql://localhost:5432/analyzer
     username: postgres
@@ -19,23 +27,6 @@ logging:
     ru.yandex.practicum.analyzer: DEBUG
     org.apache.kafka: INFO
     org.hibernate.SQL: WARN
-
-kafka:
-  bootstrap-servers: localhost:9092
-  snapshot-consumer:
-    group-id: analyzer-snapshot-group
-    auto-offset-reset: earliest
-    enable-auto-commit: false
-    poll-timeout-ms: 1000
-    commit-batch-size: 100
-  hub-event-consumer:
-    group-id: analyzer-hub-group
-    auto-offset-reset: earliest
-    enable-auto-commit: false
-    poll-timeout-ms: 1000
-  topics:
-    snapshots: telemetry.snapshots.v1
-    hub-events: telemetry.hubs.v1
 
 grpc:
   client:

@@ -3,13 +3,15 @@ package ru.yandex.practicum.aggregator.config;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "kafka")
+@Component
+@ConfigurationProperties(prefix = "aggregator.kafka")
 public class KafkaProperties {
 
     private String bootstrapServers = "localhost:9092";

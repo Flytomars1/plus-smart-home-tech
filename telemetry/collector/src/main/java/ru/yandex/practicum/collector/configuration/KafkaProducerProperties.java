@@ -3,10 +3,11 @@ package ru.yandex.practicum.collector.configuration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "kafka")
+@ConfigurationProperties(prefix = "collector.kafka")
 public class KafkaProducerProperties {
 
     private final Producer producer = new Producer();
