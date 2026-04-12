@@ -1,9 +1,10 @@
 package ru.yandex.practicum.api;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.ProductCategory;
 import ru.yandex.practicum.dto.ProductDto;
-import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
+import ru.yandex.practicum.dto.QuantityState;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +13,12 @@ import java.util.UUID;
 public interface ShoppingStoreApi {
 
     @GetMapping
-    List<ProductDto> getProducts(@RequestParam ProductCategory category);
+    Page<ProductDto> getProducts(
+            @RequestParam ProductCategory category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "productName,asc") List<String> sort
+    );
 
     @GetMapping("/{productId}")
     ProductDto getProduct(@PathVariable("productId") UUID productId);
@@ -27,5 +33,8 @@ public interface ShoppingStoreApi {
     boolean removeProductFromStore(@RequestBody UUID productId);
 
     @PostMapping("/quantityState")
-    boolean setProductQuantityState(@RequestBody SetProductQuantityStateRequest request);
+    boolean setProductQuantityState(
+            @RequestParam UUID productId,
+            @RequestParam QuantityState quantityState
+    );
 }

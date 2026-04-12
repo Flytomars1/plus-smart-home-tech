@@ -2,6 +2,8 @@ package ru.yandex.practicum.shoppingstore.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dto.ProductCategory;
@@ -14,9 +16,7 @@ import ru.yandex.practicum.shoppingstore.mapper.ProductMapper;
 import ru.yandex.practicum.shoppingstore.model.Product;
 import ru.yandex.practicum.shoppingstore.repository.ProductRepository;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,14 +26,12 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
-    public List<ProductDto> getProducts(ProductCategory category) {
-        log.debug("Getting products by category: {}", category);
-        List<Product> products = productRepository.findByProductCategoryAndProductState(
-                category, ProductState.ACTIVE
+    public Page<ProductDto> getProducts(ProductCategory category, Pageable pageable) {
+        log.debug("Getting products by category: {}, pageable: {}", category, pageable);
+        Page<Product> products = productRepository.findByProductCategoryAndProductState(
+                category, ProductState.ACTIVE, pageable
         );
-        return products.stream()
-                .map(productMapper::toDto)
-                .collect(Collectors.toList());
+        return products.map(productMapper::toDto);
     }
 
     public ProductDto getProduct(UUID productId) {
@@ -47,8 +45,19 @@ public class ProductService {
     public ProductDto createNewProduct(ProductDto productDto) {
         log.debug("Creating new product: {}", productDto);
         Product product = productMapper.toEntity(productDto);
-        product.setProductState(ProductState.ACTIVE);
-        product.setQuantityState(QuantityState.ENOUGH);
+
+        if (productDto.getProductState() != null) {
+            product.setProductState(productDto.getProductState());
+        } else {
+            product.setProductState(ProductState.ACTIVE);
+        }
+
+        if (productDto.getQuantityState() != null) {
+            product.setQuantityState(productDto.getQuantityState());
+        } else {
+            product.setQuantityState(QuantityState.ENOUGH);
+        }
+
         Product savedProduct = productRepository.save(product);
         return productMapper.toDto(savedProduct);
     }
@@ -60,6 +69,9 @@ public class ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + productDto.getProductId()));
 
         productMapper.updateEntity(existingProduct, productDto);
+        if (productDto.getQuantityState() != null) {
+            existingProduct.setQuantityState(productDto.getQuantityState());
+        }
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toDto(updatedProduct);
     }

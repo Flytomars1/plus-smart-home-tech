@@ -33,6 +33,8 @@ public class ProductMapper {
         product.setImageSrc(dto.getImageSrc());
         product.setProductCategory(dto.getProductCategory());
         product.setPrice(dto.getPrice());
+        product.setQuantityState(dto.getQuantityState());
+        product.setProductState(dto.getProductState());
         return product;
     }
 
@@ -51,6 +53,12 @@ public class ProductMapper {
         }
         if (dto.getPrice() != null) {
             product.setPrice(dto.getPrice());
+        }
+        if (dto.getQuantityState() != null) {
+            product.setQuantityState(dto.getQuantityState());
+        }
+        if (dto.getProductState() != null) {
+            product.setProductState(dto.getProductState());
         }
     }
 }
