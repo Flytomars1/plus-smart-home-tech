@@ -1,7 +1,6 @@
 package ru.yandex.practicum.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.ProductCategory;
 import ru.yandex.practicum.dto.ProductDto;
@@ -14,12 +13,7 @@ import java.util.UUID;
 public interface ShoppingStoreClient {
 
     @GetMapping("/api/v1/shopping-store")
-    Page<ProductDto> getProducts(
-            @RequestParam ProductCategory category,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "productName,asc") List<String> sort
-    );
+    List<ProductDto> getProducts(@RequestParam ProductCategory category);
 
     @GetMapping("/api/v1/shopping-store/{productId}")
     ProductDto getProduct(@PathVariable("productId") UUID productId);
