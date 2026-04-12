@@ -31,9 +31,16 @@ public class ProductController implements ShoppingStoreApi {
         Sort sortOrder = Sort.by(Sort.Direction.ASC, "productName");
         if (sort != null && !sort.isEmpty()) {
             String sortParam = sort.get(0);
-            String[] parts = sortParam.split(",");
-            String property = parts[0];
-            Sort.Direction direction = parts.length > 1 ? Sort.Direction.fromString(parts[1]) : Sort.Direction.ASC;
+            String[] parts = sortParam.trim().split(",");
+            String property = parts[0].trim();
+
+            Sort.Direction direction = Sort.Direction.ASC;
+            if (parts.length > 1) {
+                String directionStr = parts[1].trim().toUpperCase();
+                if ("DESC".equals(directionStr)) {
+                    direction = Sort.Direction.DESC;
+                }
+            }
             sortOrder = Sort.by(direction, property);
         }
 
