@@ -9,13 +9,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.api.ShoppingStoreApi;
-import ru.yandex.practicum.dto.ProductCategory;
-import ru.yandex.practicum.dto.ProductDto;
-import ru.yandex.practicum.dto.QuantityState;
-import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
+import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.shoppingstore.service.ProductService;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -25,27 +21,30 @@ public class ProductController implements ShoppingStoreApi {
     private final ProductService productService;
 
     @Override
-    public Page<ProductDto> getProducts(ProductCategory category, int page, int size, List<String> sort) {
+    public PageWithSort<ProductDto> getProducts(
+            @RequestParam ProductCategory category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "productName,asc") String sort) {
+
         log.debug("Getting products - category: {}, page: {}, size: {}, sort: {}", category, page, size, sort);
 
-        Sort sortOrder = Sort.by(Sort.Direction.ASC, "productName");
-        if (sort != null && !sort.isEmpty()) {
-            String sortParam = sort.get(0);
-            String[] parts = sortParam.trim().split(",");
-            String property = parts[0].trim();
+        String[] sortParams = sort.split(",");
+        String property = sortParams[0];
+        Sort.Direction direction = Sort.Direction.ASC;
 
-            Sort.Direction direction = Sort.Direction.ASC;
-            if (parts.length > 1) {
-                String directionStr = parts[1].trim().toUpperCase();
-                if ("DESC".equals(directionStr)) {
-                    direction = Sort.Direction.DESC;
-                }
+        if (sortParams.length > 1) {
+            String dir = sortParams[1].trim().toLowerCase();
+            if ("desc".equals(dir)) {
+                direction = Sort.Direction.DESC;
             }
-            sortOrder = Sort.by(direction, property);
         }
 
+        Sort sortOrder = Sort.by(direction, property);
         Pageable pageable = PageRequest.of(page, size, sortOrder);
-        return productService.getProducts(category, pageable);
+        Page<ProductDto> result = productService.getProducts(category, pageable);
+
+        return PageWithSort.from(result);
     }
 
     @Override
