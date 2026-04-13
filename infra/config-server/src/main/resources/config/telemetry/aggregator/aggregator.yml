@@ -1,3 +1,16 @@
+spring:
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+
+logging:
+  level:
+    ru.yandex.practicum.aggregator: DEBUG
+    org.apache.kafka: INFO
+
 aggregator:
   kafka:
     bootstrap-servers: localhost:9092

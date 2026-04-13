@@ -11,3 +11,16 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+
+server:
+  port: 0
+
+logging:
+  level:
+    ru.yandex.practicum.warehouse: DEBUG

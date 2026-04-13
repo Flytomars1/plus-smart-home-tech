@@ -1,3 +1,13 @@
+grpc:
+  server:
+    port: 59091
+
+logging:
+  level:
+    ru.yandex.practicum.collector: DEBUG
+    org.springframework.web: DEBUG
+    org.apache.kafka: INFO
+
 collector:
   kafka:
     producer:
