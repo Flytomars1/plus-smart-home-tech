@@ -47,5 +47,22 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  # Инициализация дополнительных баз данных для магазина
+  postgres-init-commerce:
+    image: postgres:15
+    container_name: postgres-init-commerce
+    depends_on:
+      - postgres
+    environment:
+      PGPASSWORD: postgres
+    command: >
+      bash -c "
+        until pg_isready -h postgres -U postgres; do sleep 1; done;
+        psql -h postgres -U postgres -c 'CREATE DATABASE shopping_store;' || true;
+        psql -h postgres -U postgres -c 'CREATE DATABASE shopping_cart;' || true;
+        psql -h postgres -U postgres -c 'CREATE DATABASE warehouse;' || true
+      "
+    init: true
+
 volumes:
   postgres_data:

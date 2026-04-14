@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 @Configuration
-@EnableConfigurationProperties(KafkaProducerProperties.class)
 public class KafkaConfig {
 
     private final KafkaProducerProperties properties;
