@@ -1,18 +1,16 @@
 package ru.yandex.practicum.delivery.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.yandex.practicum.dto.AddressDto;
+import lombok.*;
 import ru.yandex.practicum.dto.DeliveryState;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "deliveries")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,14 +21,7 @@ public class Delivery {
     private UUID deliveryId;
 
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "country", column = @Column(name = "from_country")),
-            @AttributeOverride(name = "city", column = @Column(name = "from_city")),
-            @AttributeOverride(name = "street", column = @Column(name = "from_street")),
-            @AttributeOverride(name = "house", column = @Column(name = "from_house")),
-            @AttributeOverride(name = "flat", column = @Column(name = "from_flat"))
-    })
-    private AddressDto fromAddress;
+    private Address fromAddress;
 
     @Embedded
     @AttributeOverrides({
@@ -40,12 +31,12 @@ public class Delivery {
             @AttributeOverride(name = "house", column = @Column(name = "to_house")),
             @AttributeOverride(name = "flat", column = @Column(name = "to_flat"))
     })
-    private AddressDto toAddress;
+    private Address toAddress;
 
     private UUID orderId;
 
     @Enumerated(EnumType.STRING)
-    private DeliveryState deliveryState;  // ← теперь используем DTO энум
+    private DeliveryState deliveryState;
 
     private Double weight;
 
@@ -53,5 +44,5 @@ public class Delivery {
 
     private Boolean fragile;
 
-    private Double deliveryPrice;
+    private BigDecimal deliveryPrice;
 }

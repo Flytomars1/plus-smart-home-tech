@@ -5,6 +5,7 @@ import ru.yandex.practicum.dto.DeliveryCostRequest;
 import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.dto.DeliveryRequest;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RequestMapping("/api/v1/delivery")
@@ -14,7 +15,7 @@ public interface DeliveryApi {
     DeliveryDto planDelivery(@RequestBody DeliveryRequest request);
 
     @PostMapping("/cost")
-    Double deliveryCost(@RequestBody DeliveryCostRequest request);
+    BigDecimal deliveryCost(@RequestBody DeliveryCostRequest request);
 
     @PostMapping("/picked")
     void deliveryPicked(@RequestBody UUID orderId);

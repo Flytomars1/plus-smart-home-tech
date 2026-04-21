@@ -1,18 +1,17 @@
 package ru.yandex.practicum.order.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.yandex.practicum.dto.OrderState;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,9 +43,9 @@ public class Order {
 
     private Boolean fragile;
 
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
-    private Double deliveryPrice;
+    private BigDecimal deliveryPrice;
 
-    private Double productPrice;
+    private BigDecimal productPrice;
 }

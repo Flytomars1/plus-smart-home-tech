@@ -1,16 +1,16 @@
 package ru.yandex.practicum.payment.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import ru.yandex.practicum.dto.PaymentStatus;  // ← импорт из DTO
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "payments")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,13 +22,13 @@ public class Payment {
 
     private UUID orderId;
 
-    private Double productTotal;
+    private BigDecimal productTotal;
 
-    private Double deliveryTotal;
+    private BigDecimal deliveryTotal;
 
-    private Double feeTotal;
+    private BigDecimal feeTotal;
 
-    private Double totalPayment;
+    private BigDecimal totalPayment;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;

@@ -8,6 +8,7 @@ import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.PaymentDto;
 import ru.yandex.practicum.payment.service.PaymentService;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -20,14 +21,14 @@ public class PaymentController {
 
     @PostMapping("/productCost")
     @ResponseStatus(HttpStatus.OK)
-    public Double productCost(@RequestBody OrderDto order) {
+    public BigDecimal productCost(@RequestBody OrderDto order) {
         log.info("POST /api/v1/payment/productCost - orderId: {}", order.getOrderId());
         return paymentService.productCost(order);
     }
 
     @PostMapping("/totalCost")
     @ResponseStatus(HttpStatus.OK)
-    public Double getTotalCost(@RequestBody OrderDto order) {
+    public BigDecimal getTotalCost(@RequestBody OrderDto order) {
         log.info("POST /api/v1/payment/totalCost - orderId: {}", order.getOrderId());
         return paymentService.getTotalCost(order);
     }

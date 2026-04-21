@@ -8,12 +8,14 @@ import ru.yandex.practicum.dto.DeliveryCostRequest;
 import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.dto.DeliveryRequest;
 
+import java.math.BigDecimal;
+
 
 @FeignClient(name = "delivery")
 public interface DeliveryClient {
 
     @PostMapping("/api/v1/delivery/cost")
-    Double deliveryCost(@RequestBody DeliveryCostRequest request);
+    BigDecimal deliveryCost(@RequestBody DeliveryCostRequest request);
 
     @PutMapping("/api/v1/delivery")
     DeliveryDto planDelivery(@RequestBody DeliveryRequest request);

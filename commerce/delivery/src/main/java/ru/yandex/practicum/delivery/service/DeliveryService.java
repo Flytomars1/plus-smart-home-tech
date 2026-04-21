@@ -2,16 +2,19 @@ package ru.yandex.practicum.delivery.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.delivery.config.WarehouseProps;
 import ru.yandex.practicum.delivery.exception.NoDeliveryFoundException;
+import ru.yandex.practicum.delivery.mapper.DeliveryMapper;
+import ru.yandex.practicum.delivery.model.Address;
 import ru.yandex.practicum.delivery.model.Delivery;
 import ru.yandex.practicum.delivery.repository.DeliveryRepository;
 import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.feign.OrderClient;
 import ru.yandex.practicum.feign.WarehouseClient;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -23,25 +26,12 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final OrderClient orderClient;
     private final WarehouseClient warehouseClient;
-
-    @Value("${delivery.warehouse.address.country}")
-    private String warehouseCountry;
-
-    @Value("${delivery.warehouse.address.city}")
-    private String warehouseCity;
-
-    @Value("${delivery.warehouse.address.street}")
-    private String warehouseStreet;
-
-    @Value("${delivery.warehouse.address.house}")
-    private String warehouseHouse;
-
-    @Value("${delivery.warehouse.address.flat}")
-    private String warehouseFlat;
+    private final WarehouseProps warehouseProps;
+    private final DeliveryMapper deliveryMapper;
 
     private static final double BASE_COST = 5.0;
 
-    public Double deliveryCost(OrderDto order, AddressDto deliveryAddress) {
+    public BigDecimal deliveryCost(OrderDto order, AddressDto deliveryAddress) {
         log.info("Calculating delivery cost for order: {}, address: {}", order.getOrderId(), deliveryAddress);
 
         AddressDto warehouseAddress = getWarehouseAddress();
@@ -81,20 +71,22 @@ public class DeliveryService {
         }
 
         log.info("Delivery cost calculated: {}", cost);
-        return cost;
+        return BigDecimal.valueOf(cost);
     }
 
     @Transactional
     public DeliveryDto planDelivery(DeliveryDto deliveryDto, OrderDto order) {
         log.info("Planning delivery for order: {}", deliveryDto.getOrderId());
 
-        AddressDto warehouseAddress = getWarehouseAddress();
-        Double deliveryPrice = deliveryCost(order, deliveryDto.getToAddress());
+        Address warehouseAddress = deliveryMapper.toAddress(getWarehouseAddress());
+        Address toAddress = deliveryMapper.toAddress(deliveryDto.getToAddress());
+
+        BigDecimal deliveryPrice = deliveryCost(order, deliveryDto.getToAddress());
 
         Delivery delivery = Delivery.builder()
                 .deliveryId(deliveryDto.getDeliveryId())
                 .fromAddress(warehouseAddress)
-                .toAddress(deliveryDto.getToAddress())
+                .toAddress(toAddress)
                 .orderId(deliveryDto.getOrderId())
                 .deliveryState(DeliveryState.CREATED)
                 .weight(order.getDeliveryWeight())
@@ -106,7 +98,8 @@ public class DeliveryService {
         delivery = deliveryRepository.save(delivery);
         log.info("Delivery created with id: {}, price: {}", delivery.getDeliveryId(), deliveryPrice);
 
-        return toDeliveryDto(delivery);
+        // Используем маппер для конвертации в DTO
+        return deliveryMapper.toDeliveryDto(delivery);
     }
 
     @Transactional
@@ -156,21 +149,11 @@ public class DeliveryService {
 
     private AddressDto getWarehouseAddress() {
         return AddressDto.builder()
-                .country(warehouseCountry)
-                .city(warehouseCity)
-                .street(warehouseStreet)
-                .house(warehouseHouse)
-                .flat(warehouseFlat)
-                .build();
-    }
-
-    private DeliveryDto toDeliveryDto(Delivery delivery) {
-        return DeliveryDto.builder()
-                .deliveryId(delivery.getDeliveryId())
-                .fromAddress(delivery.getFromAddress())
-                .toAddress(delivery.getToAddress())
-                .orderId(delivery.getOrderId())
-                .deliveryState(delivery.getDeliveryState())
+                .country(warehouseProps.getCountry())
+                .city(warehouseProps.getCity())
+                .street(warehouseProps.getStreet())
+                .house(warehouseProps.getHouse())
+                .flat(warehouseProps.getFlat())
                 .build();
     }
 }

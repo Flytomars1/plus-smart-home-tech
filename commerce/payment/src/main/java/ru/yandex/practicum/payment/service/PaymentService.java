@@ -6,15 +6,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.PaymentDto;
+import ru.yandex.practicum.dto.PaymentStatus;
 import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.feign.OrderClient;
 import ru.yandex.practicum.feign.ShoppingStoreClient;
 import ru.yandex.practicum.payment.exception.NotEnoughInfoInOrderToCalculateException;
 import ru.yandex.practicum.payment.exception.NoOrderFoundException;
+import ru.yandex.practicum.payment.mapper.PaymentMapper;
 import ru.yandex.practicum.payment.model.Payment;
-import ru.yandex.practicum.payment.model.PaymentStatus;
 import ru.yandex.practicum.payment.repository.PaymentRepository;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,42 +29,45 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ShoppingStoreClient shoppingStoreClient;
     private final OrderClient orderClient;
+    private final PaymentMapper paymentMapper;
 
-    private static final double VAT_RATE = 0.1;
+    private static final BigDecimal VAT_RATE = new BigDecimal("0.1");
 
-    public Double productCost(OrderDto order) {
+    public BigDecimal productCost(OrderDto order) {
         log.info("Calculating product cost for order: {}", order.getOrderId());
 
         if (order.getProducts() == null || order.getProducts().isEmpty()) {
             throw new NotEnoughInfoInOrderToCalculateException("Нет информации о товарах в заказе");
         }
 
-        double total = 0.0;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (Map.Entry<UUID, Long> entry : order.getProducts().entrySet()) {
             UUID productId = entry.getKey();
             Long quantity = entry.getValue();
 
             ProductDto product = shoppingStoreClient.getProduct(productId);
-            total += product.getPrice().doubleValue() * quantity;
+            BigDecimal productPrice = product.getPrice();
+            BigDecimal subtotal = productPrice.multiply(BigDecimal.valueOf(quantity));
+            total = total.add(subtotal);
         }
 
         log.info("Total product cost for order {}: {}", order.getOrderId(), total);
         return total;
     }
 
-    public Double getTotalCost(OrderDto order) {
+    public BigDecimal getTotalCost(OrderDto order) {
         log.info("Calculating total cost for order: {}", order.getOrderId());
 
-        Double productTotal = productCost(order);
+        BigDecimal productTotal = productCost(order);
 
         if (order.getDeliveryPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException("Не рассчитана стоимость доставки");
         }
-        Double deliveryTotal = order.getDeliveryPrice();
+        BigDecimal deliveryTotal = order.getDeliveryPrice();
 
-        Double vat = productTotal * VAT_RATE;
-        Double total = productTotal + vat + deliveryTotal;
+        BigDecimal vat = productTotal.multiply(VAT_RATE);
+        BigDecimal total = productTotal.add(vat).add(deliveryTotal);
 
         log.info("Total cost: products={}, vat={}, delivery={}, total={}",
                 productTotal, vat, deliveryTotal, total);
@@ -74,32 +79,27 @@ public class PaymentService {
     public PaymentDto payment(OrderDto order) {
         log.info("Creating payment for order: {}", order.getOrderId());
 
-        Double productTotal = productCost(order);
-        Double vat = productTotal * VAT_RATE;
+        BigDecimal productTotal = productCost(order);
+        BigDecimal vat = productTotal.multiply(VAT_RATE);
 
         if (order.getDeliveryPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException("Не рассчитана стоимость доставки");
         }
-        Double deliveryTotal = order.getDeliveryPrice();
-        Double totalPayment = productTotal + vat + deliveryTotal;
+        BigDecimal deliveryTotal = order.getDeliveryPrice();
+        BigDecimal totalPayment = productTotal.add(vat).add(deliveryTotal);
 
-        Payment payment = Payment.builder()
-                .orderId(order.getOrderId())
-                .productTotal(productTotal)
-                .deliveryTotal(deliveryTotal)
-                .feeTotal(vat)
-                .totalPayment(totalPayment)
-                .status(PaymentStatus.PENDING)
-                .build();
+        Payment payment = paymentMapper.toEntity(
+                order.getOrderId(),
+                productTotal,
+                deliveryTotal,
+                vat,
+                totalPayment
+        );
 
         payment = paymentRepository.save(payment);
+        log.info("Payment created with id: {}, total: {}", payment.getPaymentId(), totalPayment);
 
-        return PaymentDto.builder()
-                .paymentId(payment.getPaymentId())
-                .totalPayment(totalPayment)
-                .deliveryTotal(deliveryTotal)
-                .feeTotal(vat)
-                .build();
+        return paymentMapper.toDto(payment);
     }
 
     @Transactional

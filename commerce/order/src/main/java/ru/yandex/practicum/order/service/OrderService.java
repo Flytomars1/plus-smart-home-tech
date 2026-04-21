@@ -11,9 +11,11 @@ import ru.yandex.practicum.feign.WarehouseClient;
 import ru.yandex.practicum.order.exception.NoOrderFoundException;
 import ru.yandex.practicum.order.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.order.exception.NotAuthorizedUserException;
+import ru.yandex.practicum.order.mapper.OrderMapper;
 import ru.yandex.practicum.order.model.Order;
 import ru.yandex.practicum.order.repository.OrderRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +30,7 @@ public class OrderService {
     private final WarehouseClient warehouseClient;
     private final DeliveryClient deliveryClient;
     private final PaymentClient paymentClient;
+    private final OrderMapper orderMapper;
 
     public List<OrderDto> getClientOrders(String username) {
         if (username == null || username.isBlank()) {
@@ -35,7 +38,7 @@ public class OrderService {
         }
 
         return orderRepository.findAll().stream()
-                .map(this::toOrderDto)
+                .map(orderMapper::toDto)
                 .toList();
     }
 
@@ -62,7 +65,7 @@ public class OrderService {
         order = orderRepository.save(order);
         log.info("Order created with id: {}", order.getOrderId());
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -70,18 +73,18 @@ public class OrderService {
         log.info("Calculating delivery cost for order: {}", orderId);
 
         Order order = getOrderById(orderId);
-        OrderDto orderDto = toOrderDto(order);
+        OrderDto orderDto = orderMapper.toDto(order);
 
         DeliveryCostRequest request = DeliveryCostRequest.builder()
                 .order(orderDto)
                 .deliveryAddress(deliveryAddress)
                 .build();
 
-        Double deliveryPrice = deliveryClient.deliveryCost(request);
+        BigDecimal deliveryPrice = deliveryClient.deliveryCost(request);
         order.setDeliveryPrice(deliveryPrice);
         order = orderRepository.save(order);
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -89,13 +92,13 @@ public class OrderService {
         log.info("Calculating total cost for order: {}", orderId);
 
         Order order = getOrderById(orderId);
-        OrderDto orderDto = toOrderDto(order);
+        OrderDto orderDto = orderMapper.toDto(order);
 
-        Double totalPrice = paymentClient.getTotalCost(orderDto);
+        BigDecimal totalPrice = paymentClient.getTotalCost(orderDto);
         order.setTotalPrice(totalPrice);
         order = orderRepository.save(order);
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -108,7 +111,7 @@ public class OrderService {
             throw new IllegalStateException("Заказ не может быть оплачен в текущем статусе: " + order.getState());
         }
 
-        OrderDto orderDto = toOrderDto(order);
+        OrderDto orderDto = orderMapper.toDto(order);
         PaymentDto paymentDto = paymentClient.payment(orderDto);
 
         order.setPaymentId(paymentDto.getPaymentId());
@@ -118,7 +121,7 @@ public class OrderService {
         order = orderRepository.save(order);
         log.info("Payment completed for order: {}, paymentId: {}", orderId, paymentDto.getPaymentId());
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -136,14 +139,14 @@ public class OrderService {
                 .products(order.getProducts())
                 .build();
 
-        BookedProductsDto bookedProducts = warehouseClient.assemblyProductsForOrder(request);
+        warehouseClient.assemblyProductsForOrder(request);
 
         order.setState(OrderState.ASSEMBLED);
         order = orderRepository.save(order);
 
         log.info("Assembly completed for order: {}", orderId);
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -156,7 +159,7 @@ public class OrderService {
             throw new IllegalStateException("Заказ должен быть собран перед доставкой. Текущий статус: " + order.getState());
         }
 
-        OrderDto orderDto = toOrderDto(order);
+        OrderDto orderDto = orderMapper.toDto(order);
 
         DeliveryDto deliveryDto = DeliveryDto.builder()
                 .orderId(order.getOrderId())
@@ -176,7 +179,7 @@ public class OrderService {
 
         log.info("Delivery planned for order: {}, deliveryId: {}", orderId, createdDelivery.getDeliveryId());
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -184,7 +187,7 @@ public class OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.COMPLETED);
         order = orderRepository.save(order);
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -192,7 +195,7 @@ public class OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.PAYMENT_FAILED);
         order = orderRepository.save(order);
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -200,7 +203,7 @@ public class OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.ASSEMBLY_FAILED);
         order = orderRepository.save(order);
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -208,7 +211,7 @@ public class OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.DELIVERY_FAILED);
         order = orderRepository.save(order);
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     @Transactional
@@ -232,28 +235,11 @@ public class OrderService {
         order.setState(OrderState.PRODUCT_RETURNED);
         order = orderRepository.save(order);
 
-        return toOrderDto(order);
+        return orderMapper.toDto(order);
     }
 
     private Order getOrderById(UUID orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new NoOrderFoundException("Заказ не найден: " + orderId));
-    }
-
-    private OrderDto toOrderDto(Order order) {
-        return OrderDto.builder()
-                .orderId(order.getOrderId())
-                .shoppingCartId(order.getShoppingCartId())
-                .products(order.getProducts())
-                .paymentId(order.getPaymentId())
-                .deliveryId(order.getDeliveryId())
-                .state(order.getState())
-                .deliveryWeight(order.getDeliveryWeight())
-                .deliveryVolume(order.getDeliveryVolume())
-                .fragile(order.getFragile())
-                .totalPrice(order.getTotalPrice())
-                .deliveryPrice(order.getDeliveryPrice())
-                .productPrice(order.getProductPrice())
-                .build();
     }
 }

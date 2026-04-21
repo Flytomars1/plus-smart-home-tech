@@ -6,14 +6,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.PaymentDto;
 
+import java.math.BigDecimal;
+
 @FeignClient(name = "payment")
 public interface PaymentClient {
 
     @PostMapping("/api/v1/payment/productCost")
-    Double productCost(@RequestBody OrderDto order);
+    BigDecimal productCost(@RequestBody OrderDto order);
 
     @PostMapping("/api/v1/payment/totalCost")
-    Double getTotalCost(@RequestBody OrderDto order);
+    BigDecimal getTotalCost(@RequestBody OrderDto order);
 
     @PostMapping("/api/v1/payment")
     PaymentDto payment(@RequestBody OrderDto order);

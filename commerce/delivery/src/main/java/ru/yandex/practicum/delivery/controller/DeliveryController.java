@@ -9,6 +9,7 @@ import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.dto.DeliveryRequest;
 import ru.yandex.practicum.delivery.service.DeliveryService;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -26,7 +27,7 @@ public class DeliveryController implements DeliveryApi {
     }
 
     @Override
-    public Double deliveryCost(DeliveryCostRequest request) {
+    public BigDecimal deliveryCost(DeliveryCostRequest request) {
         log.info("POST /api/v1/delivery/cost - orderId: {}", request.getOrder().getOrderId());
         return deliveryService.deliveryCost(request.getOrder(), request.getDeliveryAddress());
     }
