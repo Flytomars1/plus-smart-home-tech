@@ -1,0 +1,153 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+    loadbalancer:
+      cache:
+        ttl: 5s
+        capacity: 100
+      retry:
+        enabled: true
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: shopping_cart_service_route
+          uri: lb://shopping-cart
+          predicates:
+            - Path=/shopping-cart/**
+          filters:
+            - PrefixPath=/api/v1
+            - name: Retry
+              args:
+                retries: 3
+                statuses:
+                  - SERVICE_UNAVAILABLE
+                  - INTERNAL_SERVER_ERROR
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
+                  basedOnPreviousValue: true
+
+        - id: shopping_store_service_route
+          uri: lb://shopping-store
+          predicates:
+            - Path=/shopping-store/**
+          filters:
+            - PrefixPath=/api/v1
+            - name: Retry
+              args:
+                retries: 3
+                statuses:
+                  - SERVICE_UNAVAILABLE
+                  - INTERNAL_SERVER_ERROR
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
+                  basedOnPreviousValue: true
+
+        - id: warehouse_service_route
+          uri: lb://warehouse
+          predicates:
+            - Path=/warehouse/**
+          filters:
+            - PrefixPath=/api/v1
+            - name: Retry
+              args:
+                retries: 3
+                statuses:
+                  - SERVICE_UNAVAILABLE
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
+                  basedOnPreviousValue: true
+
+        - id: order_service_route
+          uri: lb://order
+          predicates:
+            - Path=/order/**
+          filters:
+            - PrefixPath=/api/v1
+            - name: Retry
+              args:
+                retries: 3
+                statuses:
+                  - SERVICE_UNAVAILABLE
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
+                  basedOnPreviousValue: true
+
+        - id: payment_service_route
+          uri: lb://payment
+          predicates:
+            - Path=/payment/**
+          filters:
+            - PrefixPath=/api/v1
+            - name: Retry
+              args:
+                retries: 3
+                statuses:
+                  - SERVICE_UNAVAILABLE
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
+                  basedOnPreviousValue: true
+
+        - id: delivery_service_route
+          uri: lb://delivery
+          predicates:
+            - Path=/delivery/**
+          filters:
+            - PrefixPath=/api/v1
+            - name: Retry
+              args:
+                retries: 3
+                statuses:
+                  - SERVICE_UNAVAILABLE
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
+                  basedOnPreviousValue: true
+
+logging:
+  level:
+    ru.yandex.practicum.gateway: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG

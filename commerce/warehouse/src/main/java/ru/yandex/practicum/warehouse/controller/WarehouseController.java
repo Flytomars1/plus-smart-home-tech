@@ -7,6 +7,9 @@ import ru.yandex.practicum.api.WarehouseApi;
 import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.warehouse.service.WarehouseService;
 
+import java.util.Map;
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +34,20 @@ public class WarehouseController implements WarehouseApi {
     @Override
     public AddressDto getWarehouseAddress() {
         return warehouseService.getWarehouseAddress();
+    }
+
+    @Override
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest request) {
+        return warehouseService.assemblyProductsForOrder(request);
+    }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        warehouseService.shippedToDelivery(request);
+    }
+
+    @Override
+    public void acceptReturn(Map<UUID, Long> products) {
+        warehouseService.acceptReturn(products);
     }
 }

@@ -60,7 +60,10 @@ services:
         until pg_isready -h postgres -U postgres; do sleep 1; done;
         psql -h postgres -U postgres -c 'CREATE DATABASE shopping_store;' || true;
         psql -h postgres -U postgres -c 'CREATE DATABASE shopping_cart;' || true;
-        psql -h postgres -U postgres -c 'CREATE DATABASE warehouse;' || true
+        psql -h postgres -U postgres -c 'CREATE DATABASE warehouse;' || true;
+        psql -h postgres -U postgres -c 'CREATE DATABASE order_db;' || true;
+        psql -h postgres -U postgres -c 'CREATE DATABASE payment;' || true;
+        psql -h postgres -U postgres -c 'CREATE DATABASE delivery;' || true
       "
     init: true
 

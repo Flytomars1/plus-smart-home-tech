@@ -3,6 +3,9 @@ package ru.yandex.practicum.api;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.*;
 
+import java.util.Map;
+import java.util.UUID;
+
 @RequestMapping("/api/v1/warehouse")
 public interface WarehouseApi {
 
@@ -17,4 +20,13 @@ public interface WarehouseApi {
 
     @GetMapping("/address")
     AddressDto getWarehouseAddress();
+
+    @PostMapping("/assembly")
+    BookedProductsDto assemblyProductsForOrder(@RequestBody AssemblyProductsForOrderRequest request);
+
+    @PostMapping("/shipped")
+    void shippedToDelivery(@RequestBody ShippedToDeliveryRequest request);
+
+    @PostMapping("/return")
+    void acceptReturn(@RequestBody Map<UUID, Long> products);
 }

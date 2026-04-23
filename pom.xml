@@ -19,6 +19,10 @@
         <module>telemetry</module>
         <module>infra</module>
         <module>commerce</module>
+        <module>infra/gateway</module>
+        <module>commerce/order</module>
+        <module>commerce/payment</module>
+        <module>commerce/delivery</module>
     </modules>
 
     <properties>
